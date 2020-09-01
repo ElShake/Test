@@ -14,6 +14,7 @@
 </head>
 
 <body>
+
   <?php
   require "header.php";
   ?>
@@ -23,9 +24,13 @@
   } else {
 
   ?>
-    <?php require 'includes/client.inc.php'; ?>
     <?php
+    require 'includes/client.inc.php';
+    require 'tabs/state.tab.php';
 
+    ?>
+
+    <?php
     if (isset($_SESSION['message'])) : ?>
       <div class="alert alert-<?= $_SESSION['msg_type'] ?>">
         <?php
@@ -44,7 +49,9 @@
             <tr>
               <th>Social Name</th>
               <th>Fiscal Code</th>
+              <th>State</th>
               <th>City</th>
+              <th>CAP</th>
               <th colspan="2">Action</th>
             </tr>
           </thead>
@@ -73,6 +80,7 @@
             </tr>
             </form>
           <?php endwhile; ?>
+
           <tr>
             <form action="includes/client.inc.php" method="REQUEST">
               <div class="form-group">
@@ -84,7 +92,84 @@
                 <td><input type="text" name="newFiscalCode" class="form-control" placeholder="Fiscal Code"></td>
               </div>
               <div class="form-group">
-                <td><input type="text" name="newCity" class="form-control" placeholder="City"></td>
+                <td>
+                  <select name="newState" class="form-control" onChange="getCity(this.value)">
+                    <option value="">Select State</option>
+                    <?php
+                    while ($state = $stater->fetch()) : ?>
+                      <option value=<?php echo $state['Sigla'] ?>><?php echo $state['Provincia'] ?></option>
+                    <?php endwhile; ?>
+                  </select></td>
+              </div>
+
+              <script type="text/javascript">
+                function getXMLHTTP() {
+                  var x = false;
+                  try {
+                    x = new XMLHttpRequest();
+                  } catch (e) {
+                    try {
+                      x = new ActiveXObject("Microsoft.XMLHTTP");
+                    } catch (ex) {
+                      try {
+                        req = new ActiveXObject("Msxml2.XMLHTTP");
+                      } catch (e1) {
+                        x = false;
+                      }
+                    }
+                  }
+                  return x;
+                }
+
+                function getCity(Sigla) {
+                  var strURL = "tabs/city.tab.php?Sigla=" + Sigla;
+                  var req = getXMLHTTP();
+                  if (req) {
+                    req.onreadystatechange = function() {
+                      if (req.readyState == 4) {
+                        // only if "OK"
+                        if (req.status == 200) {
+                          document.getElementById('citydiv').innerHTML = req.responseText;
+                        } else {
+                          alert("Problem while using XMLHTTP:\n" + req.statusText);
+                        }
+                      }
+                    }
+                    req.open("GET", strURL, true);
+                    req.send(null);
+                  }
+                }
+                function getCAP(Comune) {
+                  var strURL = "tabs/cap.tab.php?Comune=" + Comune;
+                  var req = getXMLHTTP();
+                  if (req) {
+                    req.onreadystatechange = function() {
+                      if (req.readyState == 4) {
+                        // only if "OK"
+                        if (req.status == 200) {
+                          document.getElementById('capdiv').innerHTML = req.responseText;
+                        } else {
+                          alert("Problem while using XMLHTTP:\n" + req.statusText);
+                        }
+                      }
+                    }
+                    req.open("GET", strURL, true);
+                    req.send(null);
+                  }
+                }
+              </script>
+              <div class="form-group">
+                <td>
+                  <select name="newCity" id="citydiv" class="form-control"onChange="getCAP(this.value)">
+                    <option value="" past="">Select City</option>
+
+                  </select></td>
+              </div>
+              <div class="form-group">
+                <td>
+                <div id="capdiv">  
+                <input type="text" name="newCAP"  class="form-control" placeholder="CAP"></td>
+                </div>
               </div>
               <td>
                 <div class="form-group">
@@ -125,10 +210,6 @@
 </script> -->
       <!-- Optional JavaScript -->
       <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-      <script>
-        var Tabulator = require('tabulator-tables');
-      </script>
-
       <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
       <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
